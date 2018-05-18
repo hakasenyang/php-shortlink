@@ -5,7 +5,7 @@ Example nginx configuration
 ```
 server {
     listen 443 ssl http2;
-    server_name hakase.pw; # Fix domain
+    server_name hks.pw; # Fix domain
 
     root [directory];
 

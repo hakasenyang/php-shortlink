@@ -64,7 +64,17 @@ class ShortLink {
      */
     public function Make($url, $text = NULL) {
         if (!is_NULL($text) &&
-            (strlen($text) > 16 || strlen($text < 3))) return NULL;
+            (strlen($text) > 16 || strlen($text < 3))) return 1;
+        $parse = parse_url($url);
+        switch($parse['scheme'])
+        {
+            case 'http':
+            case 'https':
+                break;
+            default:
+                return 2;
+        }
+        if (is_null($parse['host'])) return 2;
         $select = $this->Select($text, $url);
         $url = htmlspecialchars($url);
         if ($text === NULL)
@@ -112,7 +122,9 @@ $short = new ShortLink();
 
 if ($_POST['url']) {
     $data = $short->Make($_POST['url'], $_POST['str']);
-    if (!is_null($_POST['str']) &&
+    if ($data === 1) die('Short');
+    else if ($data === 2) die('This is not a valid URL address.');
+    else if (!is_null($_POST['str']) &&
         (strlen($_POST['str']) > 16 || strlen($_POST['str']) < 3)) die('Short URL must be between 3 and 16 characters long.');
     else if ($data['randstr'] !== $_POST['str'] &&
         !is_null($_POST['str']) &&

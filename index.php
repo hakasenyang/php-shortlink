@@ -4,10 +4,10 @@ class ShortLink {
      * Please enter the correct DB information.
      * @var string
      */
-    private $db_ip = '127.0.0.1';
-    private $db_id = 'hakase';
-    private $db_pw = 'hakase';
-    private $db_name = 'hakase';
+    const DB_IP = '127.0.0.1';
+    const DB_ID = 'hakase';
+    const DB_PW = 'hakase';
+    const DB_NAME = 'hakase';
 
     /**
      * mysqli Connect data.
@@ -19,7 +19,7 @@ class ShortLink {
      * Connect DB
      */
     public function __construct() {
-        $this->mysqli = @new mysqli($this->db_ip, $this->db_id, $this->db_pw, $this->db_name);
+        $this->mysqli = @new mysqli(self::DB_IP, self::DB_ID, self::DB_PW, self::DB_NAME);
         if ($this->mysqli->connect_errno) die('DB Connect ERROR!!!');
     }
     /**
@@ -50,8 +50,8 @@ class ShortLink {
      * @return array Output DB data
      */
     private function Select($text, $url = NULL) {
-        if (!is_null($text)) $text = htmlspecialchars($text);
-        if (!is_null($url)) $url = htmlspecialchars($url);
+        if (!is_null($text)) $text = htmlspecialchars($text, ENT_QUOTES);
+        if (!is_null($url)) $url = htmlspecialchars($url, ENT_QUOTES);
         return $this->mysqli->query('select randstr, url from shortlink where url = \'' . $url . '\' or randstr = \'' . $text . '\';')->fetch_array(MYSQLI_ASSOC);
     }
     /**
@@ -76,7 +76,7 @@ class ShortLink {
         }
         if (is_null($parse['host'])) return 2;
         $select = $this->Select($text, $url);
-        $url = htmlspecialchars($url);
+        $url = htmlspecialchars($url, ENT_QUOTES);
         if ($text === NULL)
             $text = $this->random_str(rand(3, 16));
         if (!is_null($select['url']) &&
@@ -89,7 +89,7 @@ class ShortLink {
             return NULL;
         if (!is_null($select['randstr']))
             return $this->Make($url);
-        $text = htmlspecialchars($text);
+        $text = htmlspecialchars($text, ENT_QUOTES);
         return ($this->mysqli->query('INSERT INTO shortlink(randstr, url) VALUES (\'' . $text . '\', \'' . $url . '\');')) ? array('randstr' => $text, 'url' => $url) : 0;
     }
     /**
@@ -111,7 +111,7 @@ class ShortLink {
         $data = $this->LinkCheck($text);
         if (!is_null($data)) {
             header($_SERVER['SERVER_PROTOCOL'] . ' 301 Moved Permanently');
-            header('Location: ' . $data);
+            header('Location: ' . htmlspecialchars_decode($data, ENT_QUOTES));
             die('<!doctype html><html><head><title>Move</title></head><body><a href="' . $data . '">Move</a></body></html>');
         }
         return NULL;
